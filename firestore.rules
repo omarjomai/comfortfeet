@@ -1,0 +1,32 @@
+rules_version = '2';
+// Orders: anyone can CREATE a well-formed cash-on-delivery order (no account needed).
+// Only the admin (signed in with the email below) can read and update orders. Nobody can delete.
+// Replace ADMIN_EMAIL_HERE with the same email as VITE_ADMIN_EMAIL.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'ADMIN_EMAIL_HERE'
+        && request.auth.token.email_verified == true;
+    }
+    function validOrder(d) {
+      return d.keys().hasOnly(['customer', 'items', 'subtotal', 'delivery', 'total', 'payment', 'status', 'createdAt'])
+        && d.payment == 'cash_on_delivery'
+        && d.status == 'nouvelle'
+        && d.createdAt == request.time
+        && d.items is list && d.items.size() > 0 && d.items.size() <= 30
+        && d.total is number && d.total > 0 && d.total < 5000
+        && d.customer.fullName is string && d.customer.fullName.size() >= 3 && d.customer.fullName.size() <= 80
+        && d.customer.phone is string && d.customer.phone.matches('^[2-9][0-9]{7}$')
+        && d.customer.address is string && d.customer.address.size() <= 200
+        && d.customer.note is string && d.customer.note.size() <= 300;
+    }
+    match /orders/{id} {
+      allow create: if validOrder(request.resource.data);
+      allow read: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['nouvelle', 'confirmée', 'expédiée', 'livrée', 'annulée'];
+      allow delete: if false;
+    }
+  }
+}
