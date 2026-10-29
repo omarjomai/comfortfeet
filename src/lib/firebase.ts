@@ -3,7 +3,9 @@ import {
   getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, doc, updateDoc,
   type Firestore, type Timestamp,
 } from 'firebase/firestore';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, type Auth, type User } from 'firebase/auth';
+import {
+  getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, type Auth, type User,
+} from 'firebase/auth';
 import type { Order } from './order';
 
 const cfg = {
@@ -96,6 +98,13 @@ export function watchUser(cb: (u: User | null) => void): () => void {
 export async function adminSignIn(email: string, password: string): Promise<void> {
   if (!auth) throw new Error('Firebase non configuré');
   await signInWithEmailAndPassword(auth, email, password);
+}
+
+export async function adminSignInWithGoogle(): Promise<void> {
+  if (!auth) throw new Error('Firebase non configuré');
+  const provider = new GoogleAuthProvider();
+  if (ADMIN_EMAIL) provider.setCustomParameters({ login_hint: ADMIN_EMAIL, prompt: 'select_account' });
+  await signInWithPopup(auth, provider);
 }
 
 export async function adminSignOut(): Promise<void> {

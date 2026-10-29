@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import type { User } from 'firebase/auth';
 import {
-  ADMIN_EMAIL, STATUSES, adminSignIn, adminSignOut, firebaseReady, setOrderStatus, watchOrders, watchUser,
+  ADMIN_EMAIL, STATUSES, adminSignIn, adminSignInWithGoogle, adminSignOut, firebaseReady, setOrderStatus, watchOrders, watchUser,
   type OrderStatus, type StoredOrder,
 } from '../lib/firebase';
 import { orderRef } from '../lib/order';
@@ -14,6 +14,15 @@ export function Admin() {
 
   if (!ready) return <div className="container section">Chargement…</div>;
   if (firebaseReady && !user) return <Login />;
+  if (firebaseReady && user && ADMIN_EMAIL && user.email !== ADMIN_EMAIL) {
+    return (
+      <div className="container section narrow">
+        <h1>Accès refusé</h1>
+        <p className="muted">Le compte {user.email} n’est pas administrateur.</p>
+        <button className="btn-outline wide" onClick={adminSignOut}>Changer de compte</button>
+      </div>
+    );
+  }
   return <Orders email={user?.email ?? null} />;
 }
 
@@ -30,14 +39,28 @@ function Login() {
       setErr('Email ou mot de passe incorrect.');
     }
   }
+  async function google() {
+    setErr('');
+    try {
+      await adminSignInWithGoogle();
+    } catch (e) {
+      const code = (e as { code?: string }).code ?? '';
+      if (code === 'auth/unauthorized-domain') setErr('Domaine non autorisé : ajoutez omarjomai.github.io dans Firebase > Authentication > Settings > Authorized domains.');
+      else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') setErr('');
+      else if (code === 'auth/popup-blocked') setErr('Fenêtre bloquée par le navigateur : autorisez les pop-ups puis réessayez.');
+      else setErr(`Connexion Google impossible (${code || (e as Error).message}).`);
+    }
+  }
   return (
     <div className="container section narrow">
       <h1>Espace admin</h1>
+      <button type="button" className="btn-primary wide" onClick={google}>Se connecter avec Google</button>
+      <p className="muted small center">ou avec email et mot de passe</p>
       <form className="form" onSubmit={submit}>
         <label className="field"><span>Email</span><input value={email} onChange={(e) => setEmail(e.target.value)} type="email" autoComplete="username" /></label>
         <label className="field"><span>Mot de passe</span><input value={password} onChange={(e) => setPassword(e.target.value)} type="password" autoComplete="current-password" /></label>
         {err && <p className="err-box">{err}</p>}
-        <button className="btn-primary wide">Se connecter</button>
+        <button className="btn-outline wide">Se connecter</button>
       </form>
     </div>
   );
