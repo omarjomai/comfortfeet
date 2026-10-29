@@ -2,6 +2,7 @@ import { StrictMode, Suspense, lazy } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { CartProvider } from './state/CartContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { Products } from './pages/Products';
@@ -15,6 +16,7 @@ const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <ErrorBoundary>
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <CartProvider>
         <Routes>
@@ -31,5 +33,6 @@ createRoot(document.getElementById('root')!).render(
         </Routes>
       </CartProvider>
     </BrowserRouter>
+    </ErrorBoundary>
   </StrictMode>,
 );
