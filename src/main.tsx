@@ -15,7 +15,7 @@ const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <CartProvider>
         <Routes>
           <Route element={<Layout />}>

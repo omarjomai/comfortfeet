@@ -1,12 +1,11 @@
 rules_version = '2';
 // Orders: anyone can CREATE a well-formed cash-on-delivery order (no account needed).
 // Only the admin (signed in with the email below) can read and update orders. Nobody can delete.
-// Replace ADMIN_EMAIL_HERE with the same email as VITE_ADMIN_EMAIL.
+// Admin email must match VITE_ADMIN_EMAIL in .env.local.
 service cloud.firestore {
   match /databases/{database}/documents {
     function isAdmin() {
-      return request.auth != null && request.auth.token.email == 'ADMIN_EMAIL_HERE'
-        && request.auth.token.email_verified == true;
+      return request.auth != null && request.auth.token.email == 'mrjomaiomar@gmail.com';
     }
     function validOrder(d) {
       return d.keys().hasOnly(['customer', 'items', 'subtotal', 'delivery', 'total', 'payment', 'status', 'createdAt'])
