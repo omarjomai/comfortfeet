@@ -1,11 +1,20 @@
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState, type FormEvent } from 'react';
+import { Logo } from './Logo';
+import { CATEGORIES } from '../data/products';
 import { useCart } from '../state/CartContext';
 import { FREE_DELIVERY_FROM } from '../data/products';
 
 export function Layout() {
   const { totals, toast } = useCart();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
+  const navigate = useNavigate();
+  const [q, setQ] = useState('');
+  const cat = new URLSearchParams(search).get('c');
+  const onSearch = (e: FormEvent) => {
+    e.preventDefault();
+    navigate(q.trim() ? `/produits?q=${encodeURIComponent(q.trim())}` : '/produits');
+  };
   // Braces matter: newer Chrome returns a Promise from scrollTo, and React would call it as a cleanup.
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -16,23 +25,36 @@ export function Layout() {
       <header className="header">
         <div className="container header-in">
           <Link to="/" className="logo" aria-label="ComfortFeet, accueil">
-            <span className="logo-mark" aria-hidden>CF</span> ComfortFeet
+            <Logo />
           </Link>
-          <nav className="nav">
-            <NavLink to="/" end>Accueil</NavLink>
-            <NavLink to="/produits">Produits</NavLink>
-            <NavLink to="/panier" className="nav-cart">
-              <CartIcon /> Panier
+          <form className="search" role="search" onSubmit={onSearch}>
+            <SearchIcon />
+            <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher une chaussette, une couleur…" aria-label="Rechercher" />
+          </form>
+          <div className="head-icons">
+            <NavLink to="/panier" className="icon-link nav-cart" aria-label="Panier">
+              <CartIcon />
+              <span>Panier</span>
               {totals.count > 0 && <span className="cart-count">{totals.count}</span>}
             </NavLink>
-          </nav>
+          </div>
         </div>
+        <nav className="menu" aria-label="Catégories">
+          <div className="container menu-in">
+            <NavLink to="/" end>Accueil</NavLink>
+            <Link to="/produits" className={pathname === '/produits' && !cat && !search.includes('q=') ? 'active' : ''}>Tous les produits</Link>
+            {CATEGORIES.map((c) => (
+              <Link key={c.id} to={`/produits?c=${c.id}`} className={cat === c.id ? 'active' : ''}>{c.label}</Link>
+            ))}
+            <Link to="/produits?c=packs" className="menu-promo">Promos</Link>
+          </div>
+        </nav>
       </header>
       <main><Outlet /></main>
       <footer className="footer">
         <div className="container footer-grid">
           <div>
-            <div className="footer-logo">ComfortFeet</div>
+            <div className="footer-logo"><Logo light /></div>
             <p>Des chaussettes confortables, solides et bien coupées, livrées chez vous partout en Tunisie.</p>
           </div>
           <div>
@@ -61,9 +83,17 @@ export function Layout() {
   );
 }
 
+function SearchIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+    </svg>
+  );
+}
+
 function CartIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
       <path d="M6 7h12l-1 13H7L6 7z" /><path d="M9 7a3 3 0 0 1 6 0" />
     </svg>
   );

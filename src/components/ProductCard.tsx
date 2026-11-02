@@ -11,15 +11,15 @@ export function ProductCard({ p }: { p: Product }) {
         <SockArt color={p.colors[0].hex} pattern={p.pattern} height={p.height} size={190} />
       </div>
       <div className="card-body">
+        <span className="card-cat">{p.category}</span>
         <h3>{p.name}</h3>
-        <div className="price">
+        <div className={p.oldPrice ? 'price promo' : 'price'}>
           {dt(p.price)} {p.oldPrice && <s>{dt(p.oldPrice)}</s>}
         </div>
         <div className="swatches">
           {p.colors.slice(0, 4).map((c) => <span key={c.name} className="dot" style={{ background: c.hex }} title={c.name} />)}
         </div>
         <div className="sizes">{p.sizes.map((s) => <span key={s} className="chip-sm">{s}</span>)}</div>
-        <span className="btn-outline">Voir plus</span>
       </div>
     </Link>
   );

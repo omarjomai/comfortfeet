@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 150" width="560" height="150">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,500;9..40,800&amp;family=Dancing+Script:wght@600&amp;display=swap');
+    .n { font-family: 'DM Sans', Arial, sans-serif; font-size: 96px; letter-spacing: -4px; }
+    .t { font-family: 'DM Sans', Arial, sans-serif; font-size: 19px; font-weight: 500; letter-spacing: 4px; fill: #b0123f; }
+    .s { font-family: 'Dancing Script', cursive; font-size: 30px; letter-spacing: 0; }
+  </style>
+  <text x="8" y="92" class="n"><tspan font-weight="500" fill="#2b2b2b">comfort</tspan><tspan font-weight="800" fill="#b0123f" letter-spacing="-3">feet</tspan></text>
+  <text x="12" y="132" class="t">MARCHEZ <tspan class="s">léger</tspan> CHAQUE JOUR</text>
+</svg>
